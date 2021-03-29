@@ -1,0 +1,24 @@
+.homeList p {
+  text-align: left;
+  font-size: medium;
+}
+
+h4, h5 {
+  color:white;
+  text-align: center;
+}
+
+p {
+  color: white
+}
+
+.error {
+  color: red;
+  font-weight: bold
+}
+
+h6 {
+  text-align: center;
+  color: beige;
+  font-weight: bold;
+}

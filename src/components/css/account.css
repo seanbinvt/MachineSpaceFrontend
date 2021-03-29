@@ -1,0 +1,15 @@
+.content {
+    text-align: center;
+}
+
+form {
+    max-width: 350px;
+}
+
+h5, button{
+    font-weight: bold !important;
+}
+
+button:hover {
+    background-color: grey;
+}

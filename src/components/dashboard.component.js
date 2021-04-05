@@ -104,10 +104,11 @@ export default class Dashboard extends Component {
                 </button> 
             </form>
             <br/>
-            <h5>Your Files:</h5>
+            <h5>Your Snapshots:</h5>
             {this.props.files.length > 0 && this.props.files.map((file, index) => {
                 return <FileInfo name={file.name} description={file.description} index={index}/>
             })}
+            <button>Create New Snapshot</button>
           </div>
           </div>
         );

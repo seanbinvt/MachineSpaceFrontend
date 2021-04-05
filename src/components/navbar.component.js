@@ -41,6 +41,10 @@ export default class Navbar extends Component {
               <li className="nav-item">
                 <Link className="nav-link" to="/about">About</Link>
               </li>
+            { this.props.state && 
+              <li className="nav-item">
+                <a className="nav-link" href="http://machinespace.ddns.net/spice-html5/spice.html">Access</a>
+              </li> }
             </ul>
             { !this.props.state && 
             <ul className="navbar-nav nav ml-auto">
@@ -55,6 +59,8 @@ export default class Navbar extends Component {
                 <Link className="nav-link" onClick={this.logout}>Logout</Link>
               </li>
             </ul> }
+
+            
           </div>
           </div>
         </nav> 

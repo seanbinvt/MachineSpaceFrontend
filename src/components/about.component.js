@@ -7,6 +7,9 @@ export default class About extends Component {
     render() {
         return (
             <div>
+                { 
+                //could use this to diplay it<iframe src="http://machinespace.ddns.net/spice-html5/spice_auto.html" title="VM Viewer"></iframe> 
+                }
                 <h6>Developers:</h6>
                 <br/>
                 <h6>Sean Blevins</h6>

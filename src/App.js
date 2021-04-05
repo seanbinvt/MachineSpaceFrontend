@@ -11,6 +11,7 @@ import Register from "./components/auth/register.component"
 import Dashboard from "./components/dashboard.component"
 import About from "./components/about.component"
 import Cookies from 'js-cookie'
+import Spice from "./components/spice.component"
 //import {decode} from 'base-64'
 //import { findByLabelText } from '@testing-library/react'
 
@@ -33,8 +34,8 @@ export default class App extends Component {
   }
 
   handleLogout() {
-    Cookies.remove("session")
-    Cookies.remove("username")
+    Cookies.remove("session", { path: '/', domain: ".machinespace.ddns.net" })
+    Cookies.remove("username", { path: '/', domain: ".machinespace.ddns.net" })
     this.setState({
       state: false,
       user: "",
@@ -94,6 +95,13 @@ export default class App extends Component {
             user={this.state.user} apiPath={this.state.API_ENDPOINT} />
           )}/>
           }
+
+          { this.state.state !== false &&
+          <Route exact path="/vm/:username/:port" render={props => (
+            <Spice {... props} state={this.state.state} user={this.state.user} apiPath={this.state.API_ENDPOINT} />
+          )}/>
+          }
+
           <Route exact path="/about" component={About}/>
           {/*<Route path="/battlepaste/:server/:id" exact component={ViewBattlePaste} />*/}
         </div>

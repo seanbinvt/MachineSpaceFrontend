@@ -22,41 +22,41 @@ export default class App extends Component {
     this.state = {
       state: Cookies.get('session') || false,
       user: Cookies.get('username') || "",
-      files: [],
-      API_ENDPOINT: process.env.REACT_APP_API_PATH || 'https://battlepasteapi.herokuapp.com'
+      snapshots: JSON.stringify(Cookies.get('snapshots').replace(/\s/g, '')) || [],
+      API_ENDPOINT: process.env.REACT_APP_API_PATH
     }
 
     this.setState({test:true})
     //console.log("APP THIS", this)
     this.handleLogin = this.handleLogin.bind(this)
     this.handleLogout = this.handleLogout.bind(this)
-    this.addFile = this.addFile.bind(this)
+    this.addSnapshot = this.addSnapshot.bind(this)
   }
 
   handleLogout() {
     Cookies.remove("session", { path: '/', domain: ".machinespace.ddns.net" })
     Cookies.remove("username", { path: '/', domain: ".machinespace.ddns.net" })
+    Cookies.remove("snapshots", { path: '/', domain: ".machinespace.ddns.net" })
     this.setState({
       state: false,
       user: "",
-      files: []
+      snapshots: []
     });
     //localStorage.removeItem('LoggedIn')
     //localStorage.removeItem('User')
   }
 
-  addFile(name, description) {
-    var join = this.state.files.concat({name: name, description: description})
+  addSnapshot(snapshots, name) {
     this.setState({
-      files: join
+      snapshots: "["+snapshots.toString()+name+"]"
     })
   }
 
-  handleLogin(username, files) {
+  handleLogin(username, snapshots) {
     this.setState({
       user: username,
       state: Cookies.get('session'),
-      files: files
+      snapshots: snapshots
     })
     //localStorage.setItem("User", username)
     //localStorage.setItem("LoggedIn", true)
@@ -91,7 +91,7 @@ export default class App extends Component {
           {/* Routes that require to be logged in */}
           { this.state.state !== false &&
           <Route exact path="/dashboard" render={props => (
-            <Dashboard {... props} state={this.state.state} files={this.state.files} addFile={this.addFile}
+            <Dashboard {... props} state={this.state.state} snapshots={this.state.snapshots.substring(2, this.state.snapshots.length-2).split(",")} addSnapshot={this.addSnapshot}
             user={this.state.user} apiPath={this.state.API_ENDPOINT} />
           )}/>
           }

@@ -50,15 +50,15 @@ export default class Navbar extends Component {
         if (this.state.username !== "" && this.state.password !== "") {
             //console.log('here')
 
-            axios.post(this.props.apiPath + '/login', {
+            axios.post(this.props.apiPath + '/api/login', {
                 username: this.state.username,
                 password: this.state.password},
                 {withCredentials: true
             }).then((response, error) => {
                 if (error) {
                 } else if (response.data.errorCode === 0) {
-                    if (response.data.files != null) {
-                        this.props.handleLogin(response.data.username, response.data.files)
+                    if (response.data.snapshots != null) {
+                        this.props.handleLogin(response.data.username, response.data.snapshots)
                     } else {
                         this.props.handleLogin(response.data.username, [])
                     }

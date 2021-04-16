@@ -13,7 +13,10 @@ export default class Home extends Component {
         return (
             <div>
                 <h4>Welcome to Machine.Space!</h4>
-                <h5>Logged In: {this.props.state}</h5>
+                {this.props.state
+                ? <h5>Logged In: {this.props.state}</h5>
+                : <h5>Hello user, please log in.</h5>
+                    }
             </div>
         );
     }

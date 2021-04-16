@@ -122,6 +122,7 @@ export default class Dashboard extends Component {
                     validation: ""
                 })
             }
+            this.props.removeSnapshot(this.props.snapshots, snapshotName)
         })
     }
 

@@ -57,11 +57,7 @@ export default class Navbar extends Component {
             }).then((response, error) => {
                 if (error) {
                 } else if (response.data.errorCode === 0) {
-                    if (response.data.snapshots != null) {
-                        this.props.handleLogin(response.data.username, response.data.snapshots)
-                    } else {
-                        this.props.handleLogin(response.data.username, [])
-                    }
+                    this.props.handleLogin(response.data.username)
                     this.props.history.push('/')  
                 } else {
                     // Error for "Incorrect username/password"

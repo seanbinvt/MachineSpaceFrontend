@@ -10,14 +10,14 @@ export default class Dashboard extends Component {
   constructor(props) {
     super(props);
 
-    console.log(this.props.snapshots)
-
     this.state = {
         newSnapshotName: "",
         deleteSnapshotName: "",
         error: "",
         validation: "",
         port: null,
+        snapshots: [],
+        isAuthenticating: true
     }
 
     if (!this.props.state) {
@@ -31,6 +31,23 @@ export default class Dashboard extends Component {
     this.onStartVM = this.onStartVM.bind(this)
     this.deleteSnapshot = this.deleteSnapshot.bind(this)
     this.loadSnapshot = this.loadSnapshot.bind(this)
+    this.componentDidMount = this.componentDidMount.bind(this)
+  }
+
+  componentDidMount() {
+    axios.post(this.props.apiPath + '/api/vmGetSnapshots', {
+        username: this.props.user},
+        {withCredentials: true
+    }).then((response, error) => {
+        if (error) {
+        } else {
+            console.log(response.data.snapshots)
+            this.setState({
+                snapshots: response.data.snapshots,
+                isAuthenticating: false
+            })
+        }
+    })
   }
 
   onChangeNewSnapshot(e) {
@@ -45,11 +62,10 @@ export default class Dashboard extends Component {
             {withCredentials: true
         }).then((response, error) => {
             if (error) {
-            } else if (response.data.errorCode === 0) {
+            } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
-                    validation: "VM is being created successfully on port "+response.data.port.toString()+".",
-                    port: response.data.port 
+                    validation: "VM is being created successfully, please wait and then press start VM to connect."
                 })
             } else {
                 // Error creating the VM. (Happens if VM is already created for that name)
@@ -67,7 +83,7 @@ export default class Dashboard extends Component {
             {withCredentials: true
         }).then((response, error) => {
             if (error) {
-            } else if (response.data.errorCode === 0) {
+            } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
                     validation: "VM has started successfully on port "+response.data.port.toString()+".",
@@ -88,7 +104,7 @@ export default class Dashboard extends Component {
             {withCredentials: true
         }).then((response, error) => {
             if (error) {
-            } else if (response.data.errorCode === 0) {
+            } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
                     validation: "VM has shut down successfully ",
@@ -110,19 +126,23 @@ export default class Dashboard extends Component {
             {withCredentials: true
         }).then((response, error) => {
             if (error) {
-            } else if (response.data.errorCode === 0) {
+            } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
                     validation: "Snapshot "+snapshotName+" deleted successfully.",
-                    port: response.data.port 
+                    //port: response.data.port,
+                    snapshots: this.state.snapshots.filter(e => e !== snapshotName)
                 })
             } else {
                 this.setState({
                     error: "Snapshot name doesn't exist.",
-                    validation: ""
+                    validation: "",
+                    snapshots: this.state.snapshots.filter(e => e !== snapshotName)
                 })
             }
-            this.props.removeSnapshot(this.props.snapshots, snapshotName)
+        })
+        this.setState({
+
         })
     }
 
@@ -133,7 +153,7 @@ export default class Dashboard extends Component {
         {withCredentials: true
     }).then((response, error) => {
         if (error) {
-        } else if (response.data.errorCode === 0) {
+        } else if (response.data.error === 0) {
             this.setState({
                 error: "",
                 validation: "Snapshot "+snapshotName+" loaded successfully."
@@ -149,19 +169,20 @@ export default class Dashboard extends Component {
 
   onCreateSnapshot(e) {
     e.preventDefault();
-    if (this.state.newSnapshotName !== "" && !this.props.snapshots.includes("this.state.newSnapshotName")) {
+    var snapName = this.state.newSnapshotName.replaceAll(" ", "_")
+    if (this.state.newSnapshotName !== "" && !this.state.snapshots.includes(snapName)) {
         axios.post(this.props.apiPath + '/api/vmCreateSnapshot', {
             username: this.props.user,
-            snapshotName: this.state.newSnapshotName},
+            snapshotName: snapName},
             {withCredentials: true
         }).then((response, error) => {
             if (error) {
-            } else if (response.data.errorCode === 0) {
+            } else if (response.data.error === 0) {
                 this.setState({
-                    validation: "Snapshot of name "+this.state.newSnapshotName+" created successfully.",
-                    error: ""
+                    validation: "Snapshot of name "+snapName+" created successfully.",
+                    error: "",
+                    snapshots: this.state.snapshots.push(snapName)
                 })
-                this.props.addSnapshot(this.props.snapshots, this.state.newSnapshotName)
             } else {
                 // Error for "Incorrect username/password"
                 this.setState({
@@ -188,22 +209,25 @@ export default class Dashboard extends Component {
 
             {this.state.validation && <Validation msg={this.state.validation}/>}
 
-            {this.props.snapshots[0] !== ""&& <div>
+            {!this.state.isAuthenticating && this.state.snapshots.length > 0 && <div>
             <br/>
-            <h5>Your Snapshots <i>(Click to Load):</i></h5>
-            {this.props.snapshots.map((snapshot, index) => {
-                return <Snapshots name={snapshot} index={index} handleAccess={this.loadSnapshot} handleDelete={this.deleteSnapshot}/>
+            <h5>Your Snapshots:</h5>
+            {this.state.snapshots.map((snapshot, index) => {
+                return <Snapshots name={snapshot} index={index} handleAccess={this.loadSnapshot} handleDelete={this.deleteSnapshot}/>                
             })}
             </div>
             }
 
-            {this.props.snapshots[0] === "" && <div>
+            {!this.state.isAuthenticating && this.state.snapshots.length === 0 && <div>
                     <button onClick={this.onCreateVM}>Create VM</button>
-                    <button onClick={this.onStartVM}>Start VM</button>
-                    <button onClick={this.onShutdownVM}>Shutdown VM</button>
-                    <form onSubmit={this.onCreateSnapshot}><input type="text" onChange={this.onChangeNewSnapshot} maxlength="20" className="form-control col" id="snapshotName" placeholder="Snapshot Name"/><button type="submit">Create Snapshot</button></form>
                 </div>
             }
+                                <button onClick={this.onStartVM}>Start VM</button>
+                    <button onClick={this.onShutdownVM}>Shutdown VM</button>
+
+            {!this.state.isAuthenticating && this.state.snapshots.length > 0 && <div>
+                    <form onSubmit={this.onCreateSnapshot}><input type="text" onChange={this.onChangeNewSnapshot} maxlength="20" className="form-control col" id="snapshotName" placeholder="Snapshot Name"/><button type="submit">Create Snapshot</button></form>
+                </div>}
 
           </div>
           </div>

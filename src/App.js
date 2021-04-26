@@ -22,7 +22,6 @@ export default class App extends Component {
     this.state = {
       state: Cookies.get('session') || false,
       user: Cookies.get('username') || "",
-      snapshots: JSON.stringify(Cookies.get('snapshots')) || [],
       API_ENDPOINT: process.env.REACT_APP_API_PATH
     }
 
@@ -30,44 +29,23 @@ export default class App extends Component {
     //console.log("APP THIS", this)
     this.handleLogin = this.handleLogin.bind(this)
     this.handleLogout = this.handleLogout.bind(this)
-
-    this.addSnapshot = this.addSnapshot.bind(this)
-    this.removeSnapshot = this.removeSnapshot.bind(this)
   }
 
   handleLogout() {
     Cookies.remove("session", { path: '/', domain: ".machinespace.ddns.net" })
     Cookies.remove("username", { path: '/', domain: ".machinespace.ddns.net" })
-    Cookies.remove("snapshots", { path: '/', domain: ".machinespace.ddns.net" })
     this.setState({
       state: false,
-      user: "",
-      snapshots: []
+      user: ""
     });
     //localStorage.removeItem('LoggedIn')
     //localStorage.removeItem('User')
   }
 
-  addSnapshot(snapshots, name) {
-    this.setState({
-      snapshots: "["+snapshots.toString()+name+"]"
-    })
-  }
-
-  removeSnapshot(snapshots, name) {
-    var updated = snapshots.filter(e => e !== name);
-    console.log(updated)
-    this.setState({
-      snapshots: "["+updated.toString()+"]"
-    })
-    //Cookies.remove("", { path: '/', domain: ".machinespace.ddns.net" })
-  }
-
-  handleLogin(username, snapshots) {
+  handleLogin(username) {
     this.setState({
       user: username,
       state: Cookies.get('session'),
-      snapshots: JSON.stringify(snapshots)
     })
     //localStorage.setItem("User", username)
     //localStorage.setItem("LoggedIn", true)
@@ -102,9 +80,7 @@ export default class App extends Component {
           {/* Routes that require to be logged in */}
           { this.state.state !== false &&
           <Route exact path="/dashboard" render={props => (
-            <Dashboard {... props} state={this.state.state} snapshots={this.state.snapshots.substring(2, this.state.snapshots.length-2).split(",")} 
-            addSnapshot={this.addSnapshot} removeSnapshot={this.removeSnapshot}
-            user={this.state.user} apiPath={this.state.API_ENDPOINT} />
+            <Dashboard {... props} state={this.state.state} user={this.state.user} apiPath={this.state.API_ENDPOINT} />
           )}/>
           }
 

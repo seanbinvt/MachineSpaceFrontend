@@ -50,7 +50,7 @@ export default class Navbar extends Component {
     onSubmit(e) {
         e.preventDefault();
         if (this.state.username !== "" && this.state.password !== "" && this.state.confirmPassword !== "" && this.state.password === this.state.confirmPassword) {
-            axios.post(this.props.apiPath + '/register', {
+            axios.post(this.props.apiPath + '/api/register', {
                 username: this.state.username,
                 password: this.state.password
             }).then((response, error) => {
@@ -59,7 +59,7 @@ export default class Navbar extends Component {
                 } else if (response.data.ErrorCode === 0) {
                     // Account creation successful 
                     this.props.handleLogin(response.data.Username, [])
-                    this.props.history.push('/') 
+                    this.props.history.push('/login') 
                 } else {
                     // Error for "Username already being used"
                     this.setState({

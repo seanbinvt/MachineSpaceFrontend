@@ -43,7 +43,7 @@ export default class Navbar extends Component {
               </li>
             { this.props.state && 
               <li className="nav-item">
-                <a className="nav-link" href="http://machinespace.ddns.net/spice-html5/spice.html">Access</a>
+                <a className="nav-link" target="_blank" rel="noreferrer" href="http://machinespace.ddns.net/spice-html5/spice.html">Access</a>
               </li> }
             </ul>
             { !this.props.state && 

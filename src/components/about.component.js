@@ -17,7 +17,7 @@ export default class About extends Component {
                 <h6>SeanBSoftwareDev@gmail.com</h6>
                 <br/>
                 <h6>Kevin Thayer</h6>
-                <h6>(VM System Implementation & Research)</h6>
+                <h6>(VM System Implementation, System Administration, & Research)</h6>
                 <h6>kit10290@vtc.vsc.edu</h6>
                 <br/>
                 <p>Machine Space is a website designed for the easy spin-up of Linux virtual machines

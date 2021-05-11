@@ -17,7 +17,9 @@ export default class Dashboard extends Component {
         validation: "",
         port: null,
         snapshots: [],
-        isAuthenticating: true
+        isAuthenticating: true,
+        vmCreated: "", 
+        tiemNow: "",
     }
 
     if (!this.props.state) {
@@ -42,10 +44,21 @@ export default class Dashboard extends Component {
         if (error) {
         } else {
             console.log(response.data.snapshots)
+
+            if (response.data.snapshots === "[]") {
+                this.setState({
+                    vmCreated: response.data.vmCreated,
+                    isAuthenticating: false,
+                    timeNow: response.data.timeNow
+                })
+            } else {
             this.setState({
                 snapshots: response.data.snapshots,
+                vmCreated: response.data.vmCreated,
+                timeNow: response.data.timeNow,
                 isAuthenticating: false
             })
+        }
         }
     })
   }
@@ -64,8 +77,10 @@ export default class Dashboard extends Component {
             if (error) {
             } else if (response.data.error === 0) {
                 this.setState({
+                    vmCreated: response.data.vmCreated,
+                    timeNow: response.data.vmCreated,
                     error: "",
-                    validation: "VM is being created successfully, please wait and then press start VM to connect."
+                    validation: "VM is being created successfully, please wait 10 minutes and then press start VM to connect."
                 })
             } else {
                 // Error creating the VM. (Happens if VM is already created for that name)
@@ -200,6 +215,9 @@ export default class Dashboard extends Component {
   }
 
     render() {
+        var minsRemaining = Math.floor((new Date(this.state.timeNow) - new Date(this.state.vmCreated)))
+        console.log(this.state.timeNow)
+        console.log(this.state.vmCreated)
         return (
             <div className="content">
             <div align="center">
@@ -218,16 +236,24 @@ export default class Dashboard extends Component {
             </div>
             }
 
-            {!this.state.isAuthenticating && this.state.snapshots.length === 0 && <div>
+            {!this.state.isAuthenticating && this.state.vmCreated === "" && <div>
                     <button onClick={this.onCreateVM}>Create VM</button>
                 </div>
             }
-                                <button onClick={this.onStartVM}>Start VM</button>
+            {!this.state.isAuthenticating && minsRemaining >= 10 &&
+                <div>
+                    <button onClick={this.onStartVM}>Start VM</button>
                     <button onClick={this.onShutdownVM}>Shutdown VM</button>
+                </div>
+            }
 
             {!this.state.isAuthenticating && this.state.snapshots.length > 0 && <div>
                     <form onSubmit={this.onCreateSnapshot}><input type="text" onChange={this.onChangeNewSnapshot} maxlength="20" className="form-control col" id="snapshotName" placeholder="Snapshot Name"/><button type="submit">Create Snapshot</button></form>
                 </div>}
+
+            {!this.state.isAuthenticating && minsRemaining <= 10 &&
+                <Validation msg={"You must wait another "+minsRemaining+" minutes since creating your VM"}/>
+            }
 
           </div>
           </div>

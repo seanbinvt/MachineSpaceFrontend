@@ -58,8 +58,7 @@ export default class Navbar extends Component {
                     console.log(error)
                 } else if (response.data.ErrorCode === 0) {
                     // Account creation successful 
-                    this.props.handleLogin(response.data.Username, [])
-                    this.props.history.push('/login') 
+                    this.props.history.push('/login')
                 } else {
                     // Error for "Username already being used"
                     this.setState({

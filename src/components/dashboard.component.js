@@ -19,7 +19,9 @@ export default class Dashboard extends Component {
         snapshots: [],
         isAuthenticating: true,
         vmCreated: "", 
-        tiemNow: "",
+        timeNow: "",
+        validationStart: ""
+
     }
 
     if (!this.props.state) {
@@ -42,6 +44,10 @@ export default class Dashboard extends Component {
         {withCredentials: true
     }).then((response, error) => {
         if (error) {
+        } else if (response.data.error == 5) {
+            // User auth token is expired.
+            this.props.handleLogout()
+            this.props.history.push('/')
         } else {
             console.log(response.data.snapshots)
 
@@ -80,7 +86,7 @@ export default class Dashboard extends Component {
                     vmCreated: response.data.vmCreated,
                     timeNow: response.data.vmCreated,
                     error: "",
-                    validation: "VM is being created successfully, please wait 10 minutes and then press start VM to connect."
+                    validation: "VM created successfully."
                 })
             } else {
                 // Error creating the VM. (Happens if VM is already created for that name)
@@ -101,7 +107,8 @@ export default class Dashboard extends Component {
             } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
-                    validation: "VM has started successfully on port "+response.data.port.toString()+".",
+                    validation: "",
+                    validationStart: "VM has started successfully on port "+response.data.port.toString()+". Please click here then fill in your port to access.",
                     port: response.data.port 
                 })
             } else {
@@ -122,7 +129,7 @@ export default class Dashboard extends Component {
             } else if (response.data.error === 0) {
                 this.setState({
                     error: "",
-                    validation: "VM has shut down successfully ",
+                    validation: "VM has shut down successfully.",
                     port: response.data.port 
                 })
             } else {
@@ -193,13 +200,13 @@ export default class Dashboard extends Component {
         }).then((response, error) => {
             if (error) {
             } else if (response.data.error === 0) {
+                var joined = this.state.snapshots.concat(snapName);
                 this.setState({
-                    validation: "Snapshot of name "+snapName+" created successfully.",
+                    validation: "Snapshot '"+snapName+"' created successfully.",
                     error: "",
-                    snapshots: this.state.snapshots.push(snapName)
+                    snapshots: joined
                 })
             } else {
-                // Error for "Incorrect username/password"
                 this.setState({
                     error: "Error creating new snapshot.",
                     validation: ""
@@ -208,16 +215,15 @@ export default class Dashboard extends Component {
         })
     } else {
         this.setState({
-            error: "New snapshot name already exists or isn't set.",
+            error: "Please choose a different snapshot name.",
             validation: ""
         })
     }
   }
 
     render() {
-        var minsRemaining = Math.floor((new Date(this.state.timeNow) - new Date(this.state.vmCreated)))
-        console.log(this.state.timeNow)
-        console.log(this.state.vmCreated)
+        console.log(this.state.snapshots.length)
+        var minsElapsed = Math.floor(((new Date(this.state.timeNow) - (new Date(this.state.vmCreated)))/60000))
         return (
             <div className="content">
             <div align="center">
@@ -227,32 +233,49 @@ export default class Dashboard extends Component {
 
             {this.state.validation && <Validation msg={this.state.validation}/>}
 
+            {this.state.validation === "" && this.state.error === "" && this.state.validationStart !== "" && 
+                <ValidationStart msg={this.state.validationStart}/>
+            }
+
             {!this.state.isAuthenticating && this.state.snapshots.length > 0 && <div>
             <br/>
             <h5>Your Snapshots:</h5>
             {this.state.snapshots.map((snapshot, index) => {
-                return <Snapshots name={snapshot} index={index} handleAccess={this.loadSnapshot} handleDelete={this.deleteSnapshot}/>                
+                return <div><Snapshots name={snapshot} index={index} handleAccess={this.loadSnapshot} handleDelete={this.deleteSnapshot}/><br/></div>              
             })}
             </div>
             }
 
+            {!this.state.isAuthenticating && minsElapsed < 10 && 
+                <ol style={{color: "beige"}}>
+                    <li>Press "Start VM".</li>
+                    <li>Complete the Ubuntu installation process.</li>
+                    <li>Press the "Enter" key when prompted for a system restart.</li>
+                    <li>Start your VM again to reconnect.</li>
+                </ol>
+            }
+
             {!this.state.isAuthenticating && this.state.vmCreated === "" && <div>
-                    <button onClick={this.onCreateVM}>Create VM</button>
+                    <button className={"btn-main"} onClick={this.onCreateVM}>Create VM</button>
                 </div>
             }
-            {!this.state.isAuthenticating && minsRemaining >= 10 &&
+
+            {!this.state.isAuthenticating && this.state.vmCreated !== "" &&
+                    <button className={"btn-main"} onClick={this.onStartVM}>Start VM</button>
+            }
+
+            {!this.state.isAuthenticating && minsElapsed >= 10 && 
                 <div>
-                    <button onClick={this.onStartVM}>Start VM</button>
-                    <button onClick={this.onShutdownVM}>Shutdown VM</button>
+                    <button className={"btn-main"} onClick={this.onShutdownVM}>Shutdown VM</button>
+                    <form style={{marginTop: "10px", marginBottom: "10px", textAlign: "center"}} onSubmit={this.onCreateSnapshot}>
+                        <div className={"input-group"}>
+                            <input className={"form-control"} type="text" onChange={this.onChangeNewSnapshot} maxlength="20" className="form-control col" id="snapshotName" placeholder="Snapshot Name"/>
+                            <span className={"input-group-btn"}>
+                                <button type="submit" style={{height: "100%", marginLeft: "5px"}}>Create Snapshot</button>
+                            </span>
+                        </div>
+                    </form>
                 </div>
-            }
-
-            {!this.state.isAuthenticating && this.state.snapshots.length > 0 && <div>
-                    <form onSubmit={this.onCreateSnapshot}><input type="text" onChange={this.onChangeNewSnapshot} maxlength="20" className="form-control col" id="snapshotName" placeholder="Snapshot Name"/><button type="submit">Create Snapshot</button></form>
-                </div>}
-
-            {!this.state.isAuthenticating && minsRemaining <= 10 &&
-                <Validation msg={"You must wait another "+minsRemaining+" minutes since creating your VM"}/>
             }
 
           </div>
@@ -266,11 +289,15 @@ const Error = props => (
 )
 
 const Snapshots = props => (
-    <div>
-        <p>{props.index+1}: {props.name}</p><button onClick={() => props.handleAccess(props.name)}>Load</button> <button onClick={() => props.handleDelete(props.name)}>Delete</button>
+    <div className={"btn-group"}>
+        <p style={{fontWeight: "bold"}}>{props.index+1}: {props.name}</p><button onClick={() => props.handleAccess(props.name)}>Load</button> <button onClick={() => props.handleDelete(props.name)}>Delete</button>
     </div>
 )
 
 const Validation = props => (
     <h6>{props.msg}</h6>
+)
+
+const ValidationStart = props => (
+    <h6><a target="_blank" rel="noreferrer" href="http://machinespace.ddns.net/spice-html5/spice.html">{props.msg}</a></h6>
 )

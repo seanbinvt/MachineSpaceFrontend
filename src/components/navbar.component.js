@@ -30,10 +30,6 @@ export default class Navbar extends Component {
           </button>
           <div className="collapse navbar-collapse" id="collapsibleNavbar">
             <ul className="navbar-nav nav">
-              { /*this.props.state && 
-              <li className="nav-item">
-                <Link className="nav-link" to="/account">Account</Link>
-              </li> */}
               { this.props.state && 
               <li className="nav-item"> 
               <Link className="nav-link" to="/dashboard">Dashboard</Link>

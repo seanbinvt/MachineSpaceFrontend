@@ -20,13 +20,15 @@ export default class Navbar extends Component {
             username: "",
             password: "",
             confirmPassword: "",
-            error: ""
+            error: "",
+            checkboxChecked: false
         }
 
         this.onChangeUsername = this.onChangeUsername.bind(this)
         this.onChangePassword = this.onChangePassword.bind(this)
         this.onChangeConfirmPassword = this.onChangeConfirmPassword.bind(this)
         this.onSubmit = this.onSubmit.bind(this)
+        this.handleToggle = this.handleToggle.bind(this)
     }
 
     onChangeUsername(e) {
@@ -47,9 +49,16 @@ export default class Navbar extends Component {
         })
     }
 
+    handleToggle(e) {
+        this.setState({
+            checkboxChecked: e.target.checked
+        })
+    }
+
     onSubmit(e) {
+        console.log("submit")
         e.preventDefault();
-        if (this.state.username !== "" && this.state.password !== "" && this.state.confirmPassword !== "" && this.state.password === this.state.confirmPassword) {
+        if (this.state.checkboxChecked && this.state.username !== "" && this.state.password !== "" && this.state.confirmPassword !== "" && this.state.password === this.state.confirmPassword) {
             axios.post(this.props.apiPath + '/api/register', {
                 username: this.state.username,
                 password: this.state.password
@@ -65,6 +74,10 @@ export default class Navbar extends Component {
                         error: "Username already in use."
                     })
                 }
+            })
+        } else if (!this.state.checkboxChecked) {
+            this.setState({
+                error: "Please read and accept the terms of service."
             })
         } else if (this.state.username === "" || this.state.password === "" || this.state.confirmPassword === "") {
             this.setState({
@@ -84,7 +97,7 @@ export default class Navbar extends Component {
                 { this.state.error !== "" && <Error err={this.state.error}></Error>}
                 <div align="center">
                     <h5>Register:</h5>
-                    <form onSubmit={this.onSubmit}>
+                    <form>
                     <div className="content form-group mx-sm-3 mb-2 inputs">
                         <input type="text" onChange={this.onChangeUsername} className="form-control col" id="inputUsername" placeholder="Username"/>
                     </div>
@@ -94,8 +107,12 @@ export default class Navbar extends Component {
                     <div className="form-group mx-sm-3 mb-2 inputs">
                         <input type="password" onChange={this.onChangeConfirmPassword} className="form-control col" id="inputConfirmPassword" placeholder="Confirm Password"/>
                     </div>
-                    <button type="submit" className="btn btn-primary mb-2 row">Register</button>
                     </form>
+                    <div>
+                        <input onChange={this.handleToggle} type="checkbox" id="terms" name="terms" value="Terms"/>
+                        <label style={{marginLeft: "5px"}} for="terms"><a target="_blank" rel="noreferrer" href="http://machinespace.ddns.net/terms-of-service">I have read and agree to the Machine Space terms of service.</a></label><br/>
+                    </div>
+                    <button onClick={this.onSubmit} type="submit" className="btn btn-primary mb-2 row">Register</button>
                 </div>
             </div>
         );

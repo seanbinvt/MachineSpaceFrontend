@@ -10,10 +10,8 @@ import Login from "./components/auth/login.component"
 import Register from "./components/auth/register.component"
 import Dashboard from "./components/dashboard.component"
 import About from "./components/about.component"
+import Terms from "./components/terms.component"
 import Cookies from 'js-cookie'
-import Spice from "./components/spice.component"
-//import {decode} from 'base-64'
-//import { findByLabelText } from '@testing-library/react'
 
 export default class App extends Component {
   constructor() {
@@ -61,7 +59,7 @@ export default class App extends Component {
           )}/>
           <br />
           <Route exact path="/" render={props => (
-            <Home {... props} state={this.state.state} />
+            <Home {... props} state={this.state.state} user={this.state.user}/>
           )}/>
 
           {/* Routes that require to NOT be logged in */}
@@ -80,17 +78,13 @@ export default class App extends Component {
           {/* Routes that require to be logged in */}
           { this.state.state !== false &&
           <Route exact path="/dashboard" render={props => (
-            <Dashboard {... props} state={this.state.state} user={this.state.user} apiPath={this.state.API_ENDPOINT} />
-          )}/>
-          }
-
-          { this.state.state !== false &&
-          <Route exact path="/vm/:username/:port" render={props => (
-            <Spice {... props} state={this.state.state} user={this.state.user} apiPath={this.state.API_ENDPOINT} />
+            <Dashboard {... props} handleLogout={this.handleLogout} state={this.state.state} user={this.state.user} apiPath={this.state.API_ENDPOINT} />
           )}/>
           }
 
           <Route exact path="/about" component={About}/>
+
+          <Route exact path="/terms-of-service" component={Terms}/>
           {/*<Route path="/battlepaste/:server/:id" exact component={ViewBattlePaste} />*/}
         </div>
       </Router>

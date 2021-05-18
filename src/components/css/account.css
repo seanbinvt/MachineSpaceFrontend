@@ -13,3 +13,25 @@ h5, button{
 button:hover {
     background-color: grey;
 }
+
+.container-search {
+    margin: auto;
+    min-width: 326px;
+    width: 40%;
+    padding-bottom: 5px;
+  }
+  
+  .btn-group {
+    display: inline-flex;
+  }
+
+.btn-group button {
+    padding-left: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-main {
+    width: 150px;
+    margin-top: 10px;
+}
